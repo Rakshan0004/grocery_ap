@@ -42,6 +42,7 @@ var productModal = $("#productModal");
         }
         callApi("POST", productSaveApiUrl, {
             'data': JSON.stringify(requestPayload)
+            
         });
     });
 
