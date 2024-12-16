@@ -1,5 +1,5 @@
 
-from flask import Flask, request, jsonify
+from flask import Flask, json, request, jsonify
 import products_dao, uom_dao
 from sql_connection import get_sql_connection
 
@@ -32,6 +32,15 @@ def delete_products():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+@app.route('/insertProduct', methods=['POST'])
+def insert_product():
+    request_payload = json.loads(request.form['data'])
+    product_id = products_dao.insert_new_product(connection, request_payload)
+    response = jsonify({
+        'product_id': product_id
+    })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 if __name__ == "__main__":
     print("Starting python flask sercer For Grocery Store Management System")
