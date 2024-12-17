@@ -27,6 +27,22 @@ def insert_new_product(connection, product):
 
     return cursor.lastrowid
 
+
+def edit_product(connection, product):
+    cursor = connection.cursor()
+    query = ("UPDATE products "
+            "SET name = %s, uom_id = %s, price_per_unit = %s "
+            "WHERE product_id = %s")
+    data = (product['product_name'], product['uom_id'], product['price_per_unit'], product['product_id'])
+
+    cursor.execute(query, data)
+    connection.commit()
+
+    return cursor.rowcount  # Returns the number of rows updated
+
+
+
+
 def delete_product(connection, product_id):
     cursor = connection.cursor()
     query = ("DELETE FROM products where product_id=" + str(product_id))
