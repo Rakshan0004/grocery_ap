@@ -54,6 +54,7 @@ $("#saveProduct").on("click", function () {
     });
 });
 
+// Edit Product Functionality
 $(document).on("click", ".edit-product", function () {
     var tr = $(this).closest('tr');
     var product_id = tr.data('id'); // Existing product_id
@@ -72,24 +73,33 @@ $(document).on("click", ".edit-product", function () {
     $("#productModal").modal('show');
 });
 
-// Save Product
+// Modify Save Product to handle both insert and edit
 $("#saveProduct").on("click", function () {
-    var product_id = $("#id").val(); // Retrieve the hidden product ID
-    var product_name = $("#name").val();
-    var uom_id = $("#uoms").val();
-    var price_per_unit = $("#price").val();
-
+    // Prepare the request payload
     var requestPayload = {
-        product_id: product_id,  // Include product_id for updates
-        product_name: product_name,
-        uom_id: uom_id,
-        price_per_unit: price_per_unit
+        product_id: $("#id").val(), // This will be the key difference for edit vs insert
+        name: $("#name").val(),
+        uom_id: $("#uoms").val(),
+        price_per_unit: $("#price").val()
     };
 
-    var apiUrl = product_id ? '/editProduct' : '/insertProduct'; // Use editProduct if product_id exists
-    $.post(apiUrl, { data: JSON.stringify(requestPayload) }, function (response) {
-        alert(response.message);
-        location.reload(); // Refresh the product list
+    // Determine the API endpoint based on whether product_id exists
+    var apiUrl = requestPayload.product_id ? '/editProduct' : '/insertProduct';
+
+    // Send the request
+    $.ajax({
+        url: apiUrl,
+        method: 'POST',
+        data: {
+            'data': JSON.stringify(requestPayload)
+        },
+        success: function (response) {
+            alert(response.message);
+            location.reload(); // Refresh the product list
+        },
+        error: function (xhr, status, error) {
+            alert('An error occurred: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+        }
     });
 });
 

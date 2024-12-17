@@ -1,5 +1,5 @@
 from flask import Flask, json, request, jsonify
-import products_dao, uom_dao
+import products_dao, uom_dao, order_dao
 from sql_connection import get_sql_connection
 
 app = Flask(__name__)
@@ -29,6 +29,17 @@ def delete_products():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+@app.route('/insertOrder', methods=['POST'])
+def insert_order():
+    request_payload = json.loads(request.form['data'])
+    order_id = order_dao.insert_order(connection, request_payload)
+    response = jsonify({
+        'order_id': order_id,
+        'message': 'Order added successfully'
+    })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 @app.route('/insertProduct', methods=['POST'])
 def insert_product():
     request_payload = json.loads(request.form['data'])
@@ -40,30 +51,26 @@ def insert_product():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-@app.route('/editProduct', methods=['POST'])
-def edit_product_route():
-    request_payload = json.loads(request.form['data'])
-    # Validate that product_id is provided
-    if 'product_id' not in request_payload or not request_payload['product_id']:
-        return jsonify({
-            'success': False,
-            'message': 'Product ID is missing. Update cannot proceed.'
-        }), 400
-
-    rows_affected = products_dao.edit_product(connection, request_payload)
-    if rows_affected > 0:
-        response = jsonify({
-            'success': True,
-            'message': 'Product updated successfully.'
-        })
-    else:
-        response = jsonify({
-            'success': False,
-            'message': 'Product not found or no changes made.'
-        })
-
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+@app.route('/editProduct', methods=['PUT'])
+def edit_product():
+    try:
+        # Parse request payload
+        request_payload = request.json
+        product_id = request_payload.get('product_id')
+        name = request_payload.get('name')
+        uom_id = request_payload.get('uom_id')
+        price_per_unit = request_payload.get('price_per_unit')
+        # Check if all fields are provided
+        if not all([product_id, name, uom_id, price_per_unit]):
+            return jsonify({"error": "Missing required fields"}), 400
+        # Call DAO to update product
+        rows_affected = products_dao.edit_product(connection, request_payload)
+        if rows_affected > 0:
+            return jsonify({"message": "Product updated successfully"}), 200
+        else:
+            return jsonify({"error": "Product not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 

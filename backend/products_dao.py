@@ -30,15 +30,22 @@ def insert_new_product(connection, product):
 
 def edit_product(connection, product):
     cursor = connection.cursor()
+    
     query = ("UPDATE products "
             "SET name = %s, uom_id = %s, price_per_unit = %s "
             "WHERE product_id = %s")
-    data = (product['product_name'], product['uom_id'], product['price_per_unit'], product['product_id'])
+    
+    data = (
+        product['name'], 
+        product['uom_id'], 
+        product['price_per_unit'], 
+        product['product_id']
+    )
 
     cursor.execute(query, data)
     connection.commit()
 
-    return cursor.rowcount  # Returns the number of rows updated
+    return cursor.rowcount
 
 
 
