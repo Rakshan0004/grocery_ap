@@ -31,11 +31,10 @@ def delete_products():
 
 @app.route('/insertOrder', methods=['POST'])
 def insert_order():
-    request_payload = json.loads(request.form['data'])
+    request_payload = json.loads(request.form['data'])  #this converts string to dictionary , comes from frontend
     order_id = order_dao.insert_order(connection, request_payload)
     response = jsonify({
         'order_id': order_id,
-        'message': 'Order added successfully'
     })
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
@@ -46,10 +45,17 @@ def insert_product():
     product_id = products_dao.insert_new_product(connection, request_payload)
     response = jsonify({
         'product_id': product_id,
-        'message': 'Product added successfully'
     })
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
+@app.route('/getAllOrders', methods=['GET'])
+def get_all_orders():
+    response = order_dao.get_all_orders(connection)
+    response = jsonify(response)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+    
 
 @app.route('/editProduct', methods=['PUT'])
 def edit_product():
@@ -58,11 +64,8 @@ def edit_product():
         request_payload = request.json
         product_id = request_payload.get('product_id')
         name = request_payload.get('name')
-        uom_id = request_payload.get('uom_id')
         price_per_unit = request_payload.get('price_per_unit')
-        # Check if all fields are provided
-        if not all([product_id, name, uom_id, price_per_unit]):
-            return jsonify({"error": "Missing required fields"}), 400
+        
         # Call DAO to update product
         rows_affected = products_dao.edit_product(connection, request_payload)
         if rows_affected > 0:

@@ -32,12 +32,11 @@ def edit_product(connection, product):
     cursor = connection.cursor()
     
     query = ("UPDATE products "
-            "SET name = %s, uom_id = %s, price_per_unit = %s "
+            "SET name = %s, price_per_unit = %s "
             "WHERE product_id = %s")
     
     data = (
         product['name'], 
-        product['uom_id'], 
         product['price_per_unit'], 
         product['product_id']
     )
